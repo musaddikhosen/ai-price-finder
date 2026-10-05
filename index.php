@@ -1,596 +1,407 @@
 <!DOCTYPE html>
 <html lang="bn">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>AI Product Price Finder</title>
 
-
     <style>
-
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
         }
-
 
         body {
-
-            font-family:
-                Arial,
-                "Noto Sans Bengali",
-                sans-serif;
-
-            background:
-                linear-gradient(
-                    135deg,
-                    #fff7ed,
-                    #ffffff
-                );
-
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
             color: #111827;
-
-            min-height: 100vh;
-
         }
-
 
         .container {
-
-            width: min(
-                900px,
-                92%
-            );
-
-            margin:
-                40px auto;
-
+            width: min(900px, 94%);
+            margin: 30px auto;
         }
-
 
         .header {
-
             text-align: center;
-
             margin-bottom: 25px;
-
         }
-
 
         .header h1 {
-
-            font-size: 34px;
-
-            margin-bottom: 10px;
-
+            margin: 0;
+            font-size: 30px;
         }
-
 
         .header p {
-
             color: #6b7280;
-
-            line-height: 1.6;
-
+            margin-top: 8px;
         }
-
 
         .card {
-
             background: white;
-
-            padding: 25px;
-
-            border-radius: 20px;
-
-            box-shadow:
-                0 10px 40px
-                rgba(
-                    0,
-                    0,
-                    0,
-                    .08
-                );
-
+            border-radius: 18px;
+            padding: 22px;
+            box-shadow: 0 8px 30px rgba(0,0,0,.07);
             margin-bottom: 20px;
-
         }
 
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
 
         textarea {
-
             width: 100%;
-
-            min-height: 130px;
-
-            padding: 16px;
-
-            border:
-                1px solid #d1d5db;
-
-            border-radius: 14px;
-
-            font-size: 16px;
-
+            min-height: 120px;
+            padding: 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 12px;
             resize: vertical;
-
+            font-size: 16px;
             outline: none;
-
         }
-
 
         textarea:focus {
-
-            border-color:
-                #f97316;
-
+            border-color: #f97316;
         }
-
-
-        .upload {
-
-            margin-top: 15px;
-
-            padding: 20px;
-
-            border:
-                2px dashed #d1d5db;
-
-            border-radius: 14px;
-
-            text-align: center;
-
-        }
-
 
         input[type="file"] {
-
-            margin-top: 12px;
-
             width: 100%;
-
+            padding: 12px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            margin-top: 8px;
+            background: #f8fafc;
         }
-
 
         button {
-
             width: 100%;
-
             border: none;
-
-            border-radius: 14px;
-
-            padding: 16px;
-
-            margin-top: 18px;
-
-            background:
-                #f97316;
-
+            background: #f97316;
             color: white;
-
+            padding: 15px;
+            border-radius: 12px;
             font-size: 17px;
-
             font-weight: bold;
-
             cursor: pointer;
-
+            margin-top: 18px;
         }
-
 
         button:hover {
-
-            background:
-                #ea580c;
-
+            background: #ea580c;
         }
-
 
         button:disabled {
-
-            background:
-                #9ca3af;
-
-            cursor:
-                not-allowed;
-
+            background: #9ca3af;
+            cursor: not-allowed;
         }
 
-
-        .loading {
-
+        #loading {
             display: none;
-
             text-align: center;
-
+            padding: 20px;
+            color: #f97316;
+            font-weight: bold;
         }
 
-
-        .result {
-
-            display: none;
-
-        }
-
-
-        .result-text {
-
+        #error {
             margin-top: 15px;
+        }
 
-            white-space: pre-wrap;
+        #result {
+            margin-top: 15px;
+        }
 
+        .answer {
+            background: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
             line-height: 1.8;
-
+            white-space: normal;
+            border: 1px solid #e5e7eb;
         }
 
-
-        .error {
-
-            display: none;
-
-            margin-top: 15px;
-
+        .server-response {
+            background: #fff7ed;
+            color: #7c2d12;
             padding: 15px;
-
             border-radius: 12px;
-
-            background: #fee2e2;
-
-            color: #991b1b;
-
+            overflow-x: auto;
         }
 
-
-        @media(max-width:600px) {
-
-            .container {
-
-                margin-top: 20px;
-
-            }
-
-
-            .header h1 {
-
-                font-size: 27px;
-
-            }
-
-
-            .card {
-
-                padding: 18px;
-
-            }
-
+        pre {
+            white-space: pre-wrap;
+            word-break: break-word;
         }
 
+        .footer {
+            text-align: center;
+            color: #9ca3af;
+            font-size: 13px;
+            margin-top: 30px;
+        }
     </style>
-
 </head>
-
 
 <body>
 
-
 <div class="container">
 
-
     <div class="header">
-
-        <h1>
-            🤖 AI Product Price Finder
-        </h1>
-
-        <p>
-            Product-এর নাম অথবা ছবি দিয়ে
-            AI-এর সাহায্যে তথ্য ও সম্ভাব্য
-            বাংলাদেশি বাজারদাম জানুন।
-        </p>
-
+        <h1>🔎 AI Product Price Finder</h1>
+        <p>Product সম্পর্কে প্রশ্ন করো অথবা ছবি upload করো</p>
     </div>
-
-
 
     <div class="card">
 
+        <form id="searchForm">
 
-        <textarea
-            id="question"
-            placeholder="যেমন: JBL Tune 510BT এর বাংলাদেশে বর্তমান দাম কত?"
-        ></textarea>
+            <label for="question">
+                Product সম্পর্কে প্রশ্ন
+            </label>
+
+            <textarea
+                id="question"
+                name="question"
+                placeholder="যেমন: JBL Tune 510BT এর বাংলাদেশে বর্তমান দাম কত?"
+            ></textarea>
 
 
-
-        <div class="upload">
-
-            <strong>
-                অথবা Product-এর ছবি দিন
-            </strong>
-
-            <br>
+            <label for="image" style="margin-top:18px;">
+                Product Image
+            </label>
 
             <input
                 type="file"
                 id="image"
-                accept="image/*"
+                name="image"
+                accept="image/jpeg,image/png,image/webp"
             >
 
-        </div>
+            <button type="submit" id="searchButton">
+                🔍 Search Product
+            </button>
 
-
-
-        <button
-            id="searchButton"
-        >
-            🔍 Product Search
-        </button>
-
-
-
-        <div
-            id="error"
-            class="error"
-        ></div>
-
+        </form>
 
     </div>
 
 
-
-    <div
-        id="loading"
-        class="card loading"
-    >
-
-        <h3>
-            🤖 AI কাজ করছে...
-        </h3>
-
-        <p>
-            একটু অপেক্ষা করুন।
-        </p>
-
+    <div id="loading">
+        ⏳ Gemini AI গবেষণা করছে...
     </div>
 
 
-
-    <div
-        id="result"
-        class="card result"
-    >
-
-        <h2>
-            📊 AI Result
-        </h2>
+    <div id="error"></div>
 
 
-        <div
-            id="resultText"
-            class="result-text"
-        ></div>
+    <div id="result"></div>
 
+
+    <div class="footer">
+        Powered by Gemini AI
     </div>
-
 
 </div>
 
 
-
 <script>
 
-
-const button =
-    document.getElementById(
-        "searchButton"
-    );
-
-
-const question =
-    document.getElementById(
-        "question"
-    );
+const form = document.getElementById("searchForm");
+const resultBox = document.getElementById("result");
+const loading = document.getElementById("loading");
+const errorBox = document.getElementById("error");
+const searchButton = document.getElementById("searchButton");
 
 
-const image =
-    document.getElementById(
-        "image"
-    );
+form.addEventListener("submit", async function(e) {
+
+    e.preventDefault();
+
+    resultBox.innerHTML = "";
+    errorBox.innerHTML = "";
+
+    loading.style.display = "block";
+    searchButton.disabled = true;
+    searchButton.textContent = "⏳ Searching...";
 
 
-const loading =
-    document.getElementById(
-        "loading"
-    );
+    const formData = new FormData(form);
 
 
-const result =
-    document.getElementById(
-        "result"
-    );
+    try {
+
+        const response = await fetch("api.php", {
+
+            method: "POST",
+
+            body: formData
+
+        });
 
 
-const resultText =
-    document.getElementById(
-        "resultText"
-    );
+        const rawText = await response.text();
 
 
-const errorBox =
-    document.getElementById(
-        "error"
-    );
+        console.log("SERVER RESPONSE:", rawText);
 
 
-
-button.addEventListener(
-    "click",
-    async function () {
+        loading.style.display = "none";
 
 
-        const text =
-            question.value.trim();
+        if (!rawText.trim()) {
 
-
-        const imageFile =
-            image.files[0];
-
-
-
-        if (
-            !text &&
-            !imageFile
-        ) {
-
-            showError(
-                "Product-এর নাম অথবা ছবি দিন।"
+            throw new Error(
+                "Server returned an empty response."
             );
+
+        }
+
+
+        let data;
+
+
+        try {
+
+            data = JSON.parse(rawText);
+
+        } catch (jsonError) {
+
+            resultBox.innerHTML = `
+                <div class="server-response">
+
+                    <strong>⚠️ Server Response:</strong>
+
+                    <pre>${escapeHtml(rawText)}</pre>
+
+                </div>
+            `;
 
             return;
 
         }
 
 
+        if (data.error) {
 
-        hideError();
+            errorBox.innerHTML = `
 
+                <div class="server-response">
 
-        result.style.display =
-            "none";
+                    ❌ <strong>Error:</strong>
 
+                    <br><br>
 
-        loading.style.display =
-            "block";
+                    ${escapeHtml(data.error)}
 
+                </div>
 
-        button.disabled =
-            true;
+            `;
 
-
-
-        try {
-
-
-            const formData =
-                new FormData();
-
-
-            formData.append(
-                "question",
-                text
-            );
-
-
-
-            if (imageFile) {
-
-                formData.append(
-                    "image",
-                    imageFile
-                );
-
-            }
-
-
-
-            const response =
-                await fetch(
-                    "api.php",
-                    {
-
-                        method: "POST",
-
-                        body: formData
-
-                    }
-                );
-
-
-
-            const data =
-                await response.json();
-
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    data.message ||
-                    "Server error"
-                );
-
-            }
-
-
-
-            resultText.textContent =
-                data.answer;
-
-
-            result.style.display =
-                "block";
-
+            return;
 
         }
 
-        catch(error) {
 
+        if (data.answer) {
 
-            showError(
-                error.message
-            );
+            resultBox.innerHTML = `
 
+                <div class="answer">
 
-        }
+                    <h3>🤖 AI Answer</h3>
 
-        finally {
+                    <div>
+                        ${formatAnswer(data.answer)}
+                    </div>
 
+                </div>
 
-            loading.style.display =
-                "none";
+            `;
 
+        } else {
 
-            button.disabled =
-                false;
+            resultBox.innerHTML = `
+
+                <div class="server-response">
+
+                    ⚠️ Gemini কোনো Answer পাঠায়নি।
+
+                    <br><br>
+
+                    <pre>${escapeHtml(
+                        JSON.stringify(data, null, 2)
+                    )}</pre>
+
+                </div>
+
+            `;
 
         }
 
     }
-);
+
+    catch(error) {
+
+        loading.style.display = "none";
+
+        errorBox.innerHTML = `
+
+            <div class="server-response">
+
+                ❌ <strong>Request Failed</strong>
+
+                <br><br>
+
+                ${escapeHtml(error.message)}
+
+            </div>
+
+        `;
+
+    }
+
+    finally {
+
+        searchButton.disabled = false;
+
+        searchButton.textContent = "🔍 Search Product";
+
+    }
+
+});
 
 
+function escapeHtml(text) {
 
-function showError(message) {
+    return String(text)
 
-    errorBox.textContent =
-        message;
+        .replace(/&/g, "&amp;")
 
-    errorBox.style.display =
-        "block";
+        .replace(/</g, "&lt;")
+
+        .replace(/>/g, "&gt;")
+
+        .replace(/"/g, "&quot;")
+
+        .replace(/'/g, "&#039;");
 
 }
 
 
+function formatAnswer(text) {
 
-function hideError() {
+    return escapeHtml(text)
 
-    errorBox.style.display =
-        "none";
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+
+        .replace(/\n/g, "<br>");
 
 }
-
 
 </script>
 
-
 </body>
-
 </html>
